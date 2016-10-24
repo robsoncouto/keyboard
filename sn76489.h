@@ -1,8 +1,11 @@
 #ifndef sn76489_h
 #define sn76489_h
 
+#include"keys.h"
+
 #define SNCLOCK 4000000 //4MHz
 
+#define divider(a) (SNINCLOK/(32*a))
 
 //registers
 

@@ -27,9 +27,25 @@ void setupTimer(void){
   TCCR0|=(0<<COM01)|(1<<COM00)|(1<<CS00);
   OCR0=0x01;
 }
-uint8_t scanKeys(void){
+void scanKeys(uint8_t* notes){
+  uint8_t count=0;
+  uint8_t key=0;
   LINESPORT=0x00;
   COLSPORT=0x00;
+  for(uint8_t i=0;i<NUMLINES;i++){
+    LINESPORT=(1<<i);
+    for(uint8_t j=0;j<NUMCOLS;j++){
+      if(COLSPIN&(1<<j)){
+        notes[count]=key;
+        count++;
+        if (count==2) {
+          return;
+        }
+      }
+      key++;
+
+    }
+  }
 }
 void writeData(uint8_t data){
   //writes data to sn76489

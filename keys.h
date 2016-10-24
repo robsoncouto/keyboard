@@ -15,14 +15,17 @@
 
 #define COLSPORT PORTD
 #define COLSDDR DDRD
+#define COLSPIN PIND
 
-#define LINESPORT PORTD
-#define LINESDDR DDRD
+#define LINESPORT PORTC
+#define LINESDDR DDRC
+
 //FIXME correct numbers
 #define SNWR 1
 #define SNRDY 2
 #define SNEN 3
 #define SNCLKIN 3
+
 
 
 #define NOTE_C0	16.35
