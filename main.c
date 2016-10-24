@@ -48,14 +48,13 @@ void changeFreq(uint8_t channel, uint16_t value){
     case 0x03: data|=(FREQ3REG<<1);
       break;
     default:
-      return
+      return;
   }
-  data|=value>>6;
+  data|=(value>>2)&(0xF1);
   writeData(data);
   data=0x00;
   data|=(value<<2);
   writeData(data);
-
 
 }
 void changeAttenuation(uint8_t channel, uint8_t value){
@@ -68,7 +67,7 @@ void changeAttenuation(uint8_t channel, uint8_t value){
     case 0x03: data|=(ATT3REG<<1)|(value<<4);
       break;
     default:
-      return
+      return;
   }
 
   writeData(data);
