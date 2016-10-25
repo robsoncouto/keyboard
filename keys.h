@@ -5,10 +5,10 @@
 //I consider lines the outputs and columms the inputs
 
 #define NUMLINES 8
-#define NUMCOLS  6
+#define NUMCOLS  8//actually 6, but I use pins 2-8, so 8 is the highest
 
 #define SNPORT PORTA
-#define SNDDR PORTA
+#define SNDDR DDRA
 
 #define CTRLPORT PORTB
 #define CTRLDDR DDRB

@@ -1,9 +1,13 @@
 
-
+#define F_CPU 16000000UL
 
 #include<avr/io.h>
 #include"keys.h"
 #include"sn76489.h"
+#include"serial/uart.h"
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include<stdlib.h>
 
 
 void initHardware(void){
@@ -11,8 +15,9 @@ void initHardware(void){
   CTRLDDR=(1<<SNWR)|(1<<SNEN)|(1<<SNCLKIN)|(0<<SNRDY);
   CTRLPORT=(1<<SNWR)|(1<<SNEN)|(1<<SNCLKIN);
 
-  LINESDDR=0x00;//Inputs
-  COLSDDR=0xFF;//Outpus
+  LINESDDR=0xFF;//
+  COLSDDR=0x02;//
+  COLSPORT=0x00;
 
   //direction of the data port for the sn76489
   SNDDR=0xFF;
@@ -30,17 +35,22 @@ void setupTimer(void){
 void scanKeys(uint8_t* notes){
   uint8_t count=0;
   uint8_t key=0;
+  uint8_t data[10];
+
   LINESPORT=0x00;
   COLSPORT=0x00;
   for(uint8_t i=0;i<NUMLINES;i++){
     LINESPORT=(1<<i);
-    for(uint8_t j=0;j<NUMCOLS;j++){
+    for(uint8_t j=2;j<NUMCOLS;j++){
       if(COLSPIN&(1<<j)){
-        notes[count]=key;
-        count++;
-        if (count==2) {
-          return;
-        }
+        //{debug
+        uart_puts("key:");
+        memset(data,0,10);
+        itoa(key,data,10);
+        uart_puts(data);
+        uart_puts("\n");
+        //debug}
+        _delay_ms(100);
       }
       key++;
 
@@ -92,8 +102,22 @@ void changeAttenuation(uint8_t channel, uint8_t value){
 
 int main(void){
   DDRB=(1<<PINB3);
+  uart_init(UART_BAUD_SELECT(9600,16000000UL));
+  sei();
+  initHardware();
   setupTimer();
-  while(1){
 
+  uint8_t notes[3];
+  uint8_t str[10];
+  while(1){
+    scanKeys(notes);
+    // itoa(notes[0],str,10);
+    // uart_puts("key:");
+    // uart_puts(str);
+    // uart_putc('\n');
+    // memset(str,0,10);
+    // memset(notes,0,3);
+
+    _delay_ms(1000);
   }
 }
