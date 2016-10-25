@@ -35,7 +35,6 @@ void setupTimer(void){
 void scanKeys(uint8_t* notes){
   uint8_t count=0;
   uint8_t key=0;
-  uint8_t data[10];
 
   LINESPORT=0x00;
   COLSPORT=0x00;
@@ -43,14 +42,12 @@ void scanKeys(uint8_t* notes){
     LINESPORT=(1<<i);
     for(uint8_t j=2;j<NUMCOLS;j++){
       if(COLSPIN&(1<<j)){
-        //{debug
-        uart_puts("key:");
-        memset(data,0,10);
-        itoa(key,data,10);
-        uart_puts(data);
-        uart_puts("\n");
-        //debug}
-        _delay_ms(100);
+        notes[count]=key;
+        count++;
+        if (count==10) {
+          return;
+        }
+
       }
       key++;
 
@@ -107,7 +104,7 @@ int main(void){
   initHardware();
   setupTimer();
 
-  uint8_t notes[3];
+  uint8_t notes[10];
   uint8_t str[10];
   while(1){
     scanKeys(notes);
