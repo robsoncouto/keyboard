@@ -25,6 +25,7 @@
 
 #define regfreq SNCLOCK/32 //f = N / 32n , N/32 frequency without division
 
+#define BASE 26
 //values of n
 uint16_t codes[]={
  regfreq/NOTE_C0,

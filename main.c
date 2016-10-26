@@ -8,6 +8,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include<stdlib.h>
+#include<string.h>
 
 
 void initHardware(void){
@@ -40,7 +41,7 @@ void scanKeys(uint8_t* notes,uint8_t size){
 
   LINESPORT=0x00;
   COLSPORT=0x00;
-  for(uint8_t i=7;i=!0;i--){
+  for(uint8_t i=7;i!=0;i--){
     LINESPORT=(1<<i);
     for(uint8_t j=7;j!=0;j--){
       if(COLSPIN&(1<<j)){
@@ -100,11 +101,24 @@ void changeAttenuation(uint8_t channel, uint8_t value){
 
 uint8_t channels[3];
 uint8_t keys[10];
-uint8_t keyPressed(void){
-  for(int i=0;i<10;i++){
-    if(keys[i]){
+uint8_t keyPressed(uint8_t* data,uint8_t size){
+  for(int i=0;i<size;i++){
+    if(data[i]){
       return 1;
     }
+  }
+  return 0;
+}
+
+void printKeys(uint8_t* data, uint8_t size){
+    uint8_t str[10];
+  uart_puts("Keys pressed:\n");
+  for (int i=0;i<size;i++){
+    itoa(data[i],(char*)str,10);
+    uart_puts("key:");
+    uart_puts((char*)str);
+    uart_putc('\n');
+    memset(str,0,10);
   }
 }
 
@@ -114,21 +128,29 @@ int main(void){
   sei();
   initHardware();
   setupTimer();
-
-
-  uint8_t str[10];
+  uint8_t str[20];
   while(1){
     scanKeys(keys,10);
-    uart_puts("Keys pressed:\n");
-    for (int i=0;i<10;i++){
-      itoa(keys[i],str,10);
-      uart_puts("key:");
-      uart_puts(str);
-      uart_putc('\n');
-      memset(str,0,10);
+    //check if keys still pressed
+    if(keyPressed(keys,10)){
+      for (int k = 0; k < 3; k++) {
+        for (int l = 0; l < 10; l++) {
+          if(keys[l]==channels[k]){
+            break;
+          }
+
+        }
+        channels[k]=keys[k];
+        //upadte channel
+        changeFreq(k, codes[keys[k]+25]); //starting from C2
+        uart_puts("code:");
+        itoa(codes[keys[k]+25],(char*)str,2);
+        uart_puts((char*)str);
+        uart_putc('\n');
+        memset(str,0,20);
+      }
     }
-
-
+    printKeys(keys,10);
     _delay_ms(1000);
   }
 }
