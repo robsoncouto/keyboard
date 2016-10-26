@@ -32,19 +32,21 @@ void setupTimer(void){
   TCCR0|=(0<<COM01)|(1<<COM00)|(1<<CS00);
   OCR0=0x01;
 }
-void scanKeys(uint8_t* notes){
+void scanKeys(uint8_t* notes,uint8_t size){
   uint8_t count=0;
-  uint8_t key=0;
+  uint8_t key=1;
+
+  memset(notes,0,size);
 
   LINESPORT=0x00;
   COLSPORT=0x00;
-  for(uint8_t i=0;i<NUMLINES;i++){
+  for(uint8_t i=7;i=!0;i--){
     LINESPORT=(1<<i);
-    for(uint8_t j=2;j<NUMCOLS;j++){
+    for(uint8_t j=7;j!=0;j--){
       if(COLSPIN&(1<<j)){
         notes[count]=key;
         count++;
-        if (count==10) {
+        if (count==size) {
           return;
         }
 
@@ -96,6 +98,15 @@ void changeAttenuation(uint8_t channel, uint8_t value){
   writeData(data);
 }
 
+uint8_t channels[3];
+uint8_t keys[10];
+uint8_t keyPressed(void){
+  for(int i=0;i<10;i++){
+    if(keys[i]){
+      return 1;
+    }
+  }
+}
 
 int main(void){
   DDRB=(1<<PINB3);
@@ -104,16 +115,19 @@ int main(void){
   initHardware();
   setupTimer();
 
-  uint8_t notes[10];
+
   uint8_t str[10];
   while(1){
-    scanKeys(notes);
-    // itoa(notes[0],str,10);
-    // uart_puts("key:");
-    // uart_puts(str);
-    // uart_putc('\n');
-    // memset(str,0,10);
-    // memset(notes,0,3);
+    scanKeys(keys,10);
+    uart_puts("Keys pressed:\n");
+    for (int i=0;i<10;i++){
+      itoa(keys[i],str,10);
+      uart_puts("key:");
+      uart_puts(str);
+      uart_putc('\n');
+      memset(str,0,10);
+    }
+
 
     _delay_ms(1000);
   }
