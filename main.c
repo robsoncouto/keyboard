@@ -43,7 +43,7 @@ void scanKeys(uint8_t* notes,uint8_t size){
   COLSPORT=0x00;
   for(uint8_t i=7;i!=0;i--){
     LINESPORT=(1<<i);
-    for(uint8_t j=7;j!=0;j--){
+    for(uint8_t j=7;j!=1;j--){
       if(COLSPIN&(1<<j)){
         notes[count]=key;
         count++;

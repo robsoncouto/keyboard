@@ -27,7 +27,6 @@
 #define SNCLKIN 3
 
 
-
 #define NOTE_C0	16.35
 #define NOTE_CS0 17.32
 #define NOTE_CS0 17.32
