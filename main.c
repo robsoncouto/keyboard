@@ -41,9 +41,9 @@ void scanKeys(uint8_t* notes,uint8_t size){
 
   LINESPORT=0x00;
   COLSPORT=0x00;
-  for(uint8_t i=7;i!=0;i--){
+  for(int8_t i=7;i>=0;i--){
     LINESPORT=(1<<i);
-    for(uint8_t j=7;j!=1;j--){
+    for(uint8_t j=7;j>1;j--){
       if(COLSPIN&(1<<j)){
         notes[count]=key;
         count++;
@@ -140,11 +140,13 @@ int main(void){
           }
 
         }
-        channels[k]=keys[k];
+        if(keys[k]!=0){
+          channels[k]=keys[k];
+        }
         //upadte channel
-        changeFreq(k, codes[keys[k]+25]); //starting from C2
+        changeFreq(k, codes[keys[k]+24]); //starting from C2
         uart_puts("code:");
-        itoa(codes[keys[k]+25],(char*)str,2);
+        itoa(codes[keys[k]+24],(char*)str,2);
         uart_puts((char*)str);
         uart_putc('\n');
         memset(str,0,20);
