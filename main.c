@@ -18,7 +18,6 @@ void initHardware(void){
 
   LINESDDR=0xFF;//
   COLSDDR=0x02;//
-  COLSPORT=0x00;
 
   //direction of the data port for the sn76489
   SNDDR=0xFF;
@@ -34,16 +33,13 @@ void setupTimer(void){
   OCR0=0x01;
 }
 void scanKeys(uint8_t* notes,uint8_t size){
-  uint8_t count=0;
+  uint8_t count=1;
   uint8_t key=1;
 
   memset(notes,0,size);
-
-  LINESPORT=0x00;
-  COLSPORT=0x00;
   for(int8_t i=7;i>=0;i--){
     LINESPORT=(1<<i);
-    for(uint8_t j=7;j>1;j--){
+    for(int8_t j=7;j>=2;j--){
       if(COLSPIN&(1<<j)){
         notes[count]=key;
         count++;
