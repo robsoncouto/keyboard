@@ -58,16 +58,17 @@ void writeData(uint8_t data){
   SNPORT = data;
   CTRLPORT&=~(1<<SNEN);
   CTRLPORT&=~(1<<SNWR);
+  _delay_us(10);
   CTRLPORT=(1<<SNWR)|(1<<SNEN);
 }
 void changeFreq(uint8_t channel, uint16_t value){
-  uint8_t data =0x01;
+  uint8_t data =0x80;
   switch (channel) {
-    case 0x01: data|=(FREQ1REG<<1);
+    case 0x01: data|=(FREQ1REG&0x03)<<5;
       break;
-    case 0x02: data|=(FREQ2REG<<1);
+    case 0x02: data|=(FREQ2REG&0x0F)<<5;
       break;
-    case 0x03: data|=(FREQ3REG<<1);
+    case 0x03: data|=(FREQ3REG&0x0F)<<5;
       break;
     default:
       return;
@@ -118,13 +119,17 @@ void printKeys(uint8_t* data, uint8_t size){
   }
 }
 
-int main(void){ 
+int main(void){
   DDRB=(1<<PINB3);
   uart_init(UART_BAUD_SELECT(9600,16000000UL));
   sei();
   initHardware();
   setupTimer();
   uint8_t str[20];
+  changeAttenuation(1,0x00);
+  changeAttenuation(2,0x00);
+  changeAttenuation(3,0x00);
+
   while(1){
     scanKeys(keys,10);
     //check if keys still pressed
