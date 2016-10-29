@@ -33,22 +33,22 @@ void setupTimer(void){
   OCR0=0x01;
 }
 void scanKeys(uint8_t* notes,uint8_t size){
-  uint8_t count=1;
-  uint8_t key=1;
-
+  uint8_t count=0;//FIXME car**ho
+  uint8_t key=48;
+  LINESPORT=0x00;
+  COLSPORT=0x00;
   memset(notes,0,size);
-  for(int8_t i=7;i>=0;i--){
+  for(uint8_t i=0;i<NUMLINES;i++){
     LINESPORT=(1<<i);
-    for(int8_t j=7;j>=2;j--){
+    for(uint8_t j=2;j<NUMCOLS;j++){
       if(COLSPIN&(1<<j)){
         notes[count]=key;
         count++;
         if (count==size) {
           return;
         }
-
       }
-      key++;
+      key--;
 
     }
   }
