@@ -118,7 +118,7 @@ void printKeys(uint8_t* data, uint8_t size){
   }
 }
 
-int main(void){
+int main(void){ 
   DDRB=(1<<PINB3);
   uart_init(UART_BAUD_SELECT(9600,16000000UL));
   sei();

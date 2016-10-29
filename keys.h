@@ -23,7 +23,7 @@
 //FIXME correct numbers
 #define SNWR 1
 #define SNRDY 2
-#define SNEN 3
+#define SNEN 0
 #define SNCLKIN 3
 
 
