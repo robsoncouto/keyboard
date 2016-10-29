@@ -61,33 +61,39 @@ void writeData(uint8_t data){
   _delay_us(10);
   CTRLPORT=(1<<SNWR)|(1<<SNEN);
 }
+/*The existing datasheets can be pretty confusing. I have rewritten
+the following function many times.Trusty info can be found at:
+http://www.smspower.org/Development/SN76489 //Master system development group
+http://www.primrosebank.net/computers/mtx/projects/mtxplus/data/SN76489.pdf
+*/
+
 void changeFreq(uint8_t channel, uint16_t value){
   uint8_t data =0x80;
   switch (channel) {
-    case 0x01: data|=(FREQ1REG&0x03)<<5;
+    case 0x01: data|=(FREQ1REG<<4);
       break;
-    case 0x02: data|=(FREQ2REG&0x0F)<<5;
+    case 0x02: data|=(FREQ2REG<<4);
       break;
-    case 0x03: data|=(FREQ3REG&0x0F)<<5;
+    case 0x03: data|=(FREQ3REG<<4);
       break;
     default:
       return;
   }
-  data|=(value>>2)&(0xF1);
+  data|=(value&0x0F);
   writeData(data);
   data=0x00;
-  data|=(value<<2);
+  data|=(value>>4);
   writeData(data);
 
 }
 void changeAttenuation(uint8_t channel, uint8_t value){
-  uint8_t data =0x01;
+  uint8_t data =0x80;
   switch (channel) {
-    case 0x01: data|=(ATT1REG<<1)|(value<<4);
+    case 0x01: data|=(ATT1REG<<5)|(value&0x0F);
       break;
-    case 0x02: data|=(ATT2REG<<1)|(value<<4);
+    case 0x02: data|=(ATT2REG<<5)|(value&0x0F);
       break;
-    case 0x03: data|=(ATT3REG<<1)|(value<<4);
+    case 0x03: data|=(ATT3REG<<5)|(value&0x0F);
       break;
     default:
       return;
