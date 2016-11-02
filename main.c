@@ -120,7 +120,6 @@ void changeAttenuation(uint8_t channel, uint8_t value){
     default:
       return;
   }
-
   writeData(data);
 }
 
@@ -215,7 +214,7 @@ int main(void){
     //   changeAttenuation(2,0x0F);
     //   changeAttenuation(3,0x0F);
     // }
-    printKeys(keys,10);
-    _delay_ms(1000);
+    //printKeys(keys,10);
+    //_delay_ms(1000);
   }
 }
