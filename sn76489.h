@@ -28,7 +28,7 @@
 #define BASE 24
 //values of n
 uint16_t codes[]={
- regfreq/NOTE_C0,
+ regfreq/NOTE_C0,   //0
  regfreq/NOTE_CS0,
  regfreq/NOTE_CS0,
  regfreq/NOTE_D0,
