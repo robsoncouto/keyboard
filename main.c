@@ -64,6 +64,9 @@ void scanKeys(uint8_t* notes,uint8_t size){
     }
   }
 }
+//this is necessary to reverse a byte on PORTA,  just so I don't have to desolder
+//everything and solder again. Pin 0 shold be connected to 0, but I connected to 7
+//and so on...
 uint8_t reverse(uint8_t data){
   uint8_t reversed = data;
   reversed=((reversed&0xAA)>>1) | ((reversed&0x55)<<1);
@@ -82,16 +85,16 @@ void writeData(uint8_t data){
 }
 /*The existing datasheets can be pretty confusing. I have rewritten
 the following function many times.Trusty info can be found at:
-http://www.smspower.org/Development/SN76489 //Master system development group
+http://www.smspower.org/Development/SN76489
 http://www.primrosebank.net/computers/mtx/projects/mtxplus/data/SN76489.pdf
 */
 
 void changeFreq(uint8_t channel, uint16_t value){
   uint8_t data =0x80;
   switch (channel) {
-    case 0x01: data|=(FREQ1REG<<4);
+    case 0x00: data|=(FREQ1REG<<4);
       break;
-    case 0x02: data|=(FREQ2REG<<4);
+    case 0x01: data|=(FREQ2REG<<4);
       break;
     case 0x03: data|=(FREQ3REG<<4);
       break;
@@ -108,11 +111,11 @@ void changeFreq(uint8_t channel, uint16_t value){
 void changeAttenuation(uint8_t channel, uint8_t value){
   uint8_t data =0x80;
   switch (channel) {
-    case 0x01: data|=(ATT1REG<<4)|(value&0x0F);
+    case 0x00: data|=(ATT1REG<<4)|(value&0x0F);
       break;
-    case 0x02: data|=(ATT2REG<<4)|(value&0x0F);
+    case 0x01: data|=(ATT2REG<<4)|(value&0x0F);
       break;
-    case 0x03: data|=(ATT3REG<<4)|(value&0x0F);
+    case 0x02: data|=(ATT3REG<<4)|(value&0x0F);
       break;
     default:
       return;
@@ -145,12 +148,50 @@ void printKeys(uint8_t* data, uint8_t size){
   }
 }
 
+void updateChannels(uint8_t *keys,uint8_t size){
+  uint8_t skip_flag=0; //If the key was already hit last time, keep it
+  for (int k = 0; k < 3; k++) {
+    for (int l = 0; l < size; l++) {
+      if(channels[k]==keys[l]){
+        if(channels[k]!=0){
+          skip_flag=1;
+          uart_puts("skipped\n");
+          print(k);
+          uart_putc('\n');
+          break;
+        }
+      }
+    }
+    if (!skip_flag) { //don't need to process if the key was already pressed
+      if(keys[k]!=0){
+        channels[k]=keys[k];
+
+        changeFreq(k, codes[channels[k]+24]); //starting from C2
+        changeAttenuation(k,0x00);
+        uart_puts("(pressed) channel:");
+        print(k);
+        uart_putc('\n');
+        _delay_ms(1);
+
+      }else{
+        uart_puts("(Not pressed)channel:");
+        print(k);
+        changeFreq(k, 0x0000);
+        changeAttenuation(k,0x0F);
+        channels[k]=0;
+        uart_puts("none pressed\n");
+      }
+    }
+    skip_flag=0;
+  }
+}
+
+
 int main(void){
   uart_init(UART_BAUD_SELECT(9600,16000000UL));
   sei();
   initHardware();
   setupTimer();
-  uint8_t str[20];
 
   changeAttenuation(1,0x0F);
   changeAttenuation(2,0x0F);
@@ -161,50 +202,20 @@ int main(void){
   prevkey=0;
   while(1){
     scanKeys(keys,10);
-    if(keys[0]!=prevkey){
-      changeAttenuation(1,0x00);
-      changeAttenuation(2,0x0F);
-      changeAttenuation(3,0x0F);
-      changeFreq(1, codes[keys[0]+24]);
-      prevkey=keys[0];
-    }
-    if ((keys[0]>48)||(keys[0]<1)) {
-      changeAttenuation(1,0x0F);
-      changeAttenuation(2,0x0F);
-      changeAttenuation(3,0x0F);
-    }
-    // //check if keys still pressed
-    // if(keyPressed(keys,10)){
-    //   for (int k = 0; k < 3; k++) {
-    //     for (int l = 0; l < 10; l++) {
-    //       if(keys[l]==channels[k]){
-    //         break;
-    //       }
-    //     }
-    //     if(keys[k]!=0){
-    //       channels[k]=keys[k];
-    //     }else{
-    //       changeFreq(k, 0x0000); //starting from C2
-    //       channels[k]=0;
-    //       break;
-    //     }
-    //     //upadte channel
-    //     changeFreq(k, codes[channels[k]+24]); //starting from C2
-    //     uart_puts("code:");
-    //     itoa(codes[channels[k]+24],(char*)str,2);
-    //     uart_puts((char*)str);
-    //     uart_putc('\n');
-    //     memset(str,0,20);
-    //     _delay_ms(1);
-    //   }
+    updateChannels(keys,10);
+    // if(keys[0]!=prevkey){
+    //   changeAttenuation(1,0x00);
+    //   changeAttenuation(2,0x0F);
+    //   changeAttenuation(3,0x0F);
+    //   changeFreq(1, codes[keys[0]+24]);
+    //   prevkey=keys[0];
     // }
-    // for(int i=0;i<3;i++){
-    //   uart_puts("channels:");
-    //   print(channels[i]);
-    //   uart_puts("\n");
-    //   _delay_ms(1);
+    // if ((keys[0]>48)||(keys[0]<1)) {
+    //   changeAttenuation(1,0x0F);
+    //   changeAttenuation(2,0x0F);
+    //   changeAttenuation(3,0x0F);
     // }
-     //printKeys(keys,10);
-     //_delay_ms(1000);
+    printKeys(keys,10);
+    _delay_ms(1000);
   }
 }
