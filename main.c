@@ -10,7 +10,7 @@
 #include<stdlib.h>
 #include<string.h>
 
-
+#ifdef DEBUG_ON
 void print(int data) {
   char strin[10];
   memset(strin,0,10);
@@ -20,6 +20,7 @@ void print(int data) {
   uart_putc('\n');
 
 }
+#endif
 
 void initHardware(void){
   //IO
@@ -77,7 +78,6 @@ uint8_t reverse(uint8_t data){
 void writeData(uint8_t data){
   //writes data to sn76489
   SNPORT = reverse(data); //I messed up my circuit and connected 7 to 0, 6 to  1, and so on...
-  print(data);
   CTRLPORT&=~(1<<SNEN);
   CTRLPORT&=~(1<<SNWR);
   _delay_ms(1);
@@ -135,6 +135,7 @@ uint8_t keyPressed(uint8_t* data,uint8_t size){
   return 0;
 }
 
+#ifdef DEBUG_ON
 void printKeys(uint8_t* data, uint8_t size){
     uint8_t str[10];
   uart_puts("Keys pressed:\n");
@@ -146,6 +147,7 @@ void printKeys(uint8_t* data, uint8_t size){
     memset(str,0,10);
   }
 }
+#endif
 
 void updateChannels(uint8_t *keys,uint8_t size){
   uint8_t skip_flag=0; //If the key was already hit last time, keep it
@@ -154,9 +156,11 @@ void updateChannels(uint8_t *keys,uint8_t size){
       if(channels[k]==keys[l]){
         if(channels[k]!=0){
           skip_flag=1;
+          #ifdef DEBUG_ON
           uart_puts("skipped\n");
           print(k);
           uart_putc('\n');
+          #endif
           break;
         }
       }
@@ -167,18 +171,22 @@ void updateChannels(uint8_t *keys,uint8_t size){
 
         changeFreq(k, codes[channels[k]+24]); //starting from C2
         changeAttenuation(k,0x00);
+        #ifdef DEBUG_ON
         uart_puts("(pressed) channel:");
         print(k);
         uart_putc('\n');
+        #endif
         _delay_ms(1);
 
       }else{
+        #ifdef DEBUG_ON
         uart_puts("(Not pressed)channel:");
         print(k);
+        #endif
         changeFreq(k, 0x0000);
         changeAttenuation(k,0x0F);
         channels[k]=0;
-        uart_puts("none pressed\n");
+
       }
     }
     skip_flag=0;
